@@ -10,10 +10,10 @@ Current as of 18 June 2014
 
 ###See:
 - rates folder for escalation rates and ghg pricing schemes
-- escalationRates.R code to import into R. 
+- **escalationRates.R** code to import into R. 
 
 To use: 
-1) copy R code and rates folder to your directory. 
-2) In R: 
-  setwd("filepath")
-  source('escalationRates.R')
+* 1) copy R code and rates folder to your directory. 
+* 2) In R: 
+  - setwd("filepath")
+  - source('escalationRates.R')
