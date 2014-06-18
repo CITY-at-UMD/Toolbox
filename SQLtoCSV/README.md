@@ -1,7 +1,7 @@
 SQLtoCSV
 =======
 
-##Convert E+ output SQL files into CSV format for data processing
+###Convert E+ output SQL files into CSV format for data processing
 
 ###See:
 - **ReadingEplusSQLfiles.doc** documents running SQLite3 to save key variables to csv (or other format)
