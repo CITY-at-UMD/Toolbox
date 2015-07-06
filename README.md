@@ -9,3 +9,5 @@ Tools can be found at: [toolbox.buildsci.us](http://toolbox.buildsci.us)
 - SQL to JSON for EnergyPlus Outputs
 - SQL to CSV for EnergyPlus Outputs
 - GeoJSON Converter (coming soon)
+- EPWreader for weather files
+- OpenStudioVirtualMachine
