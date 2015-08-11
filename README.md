@@ -1,13 +1,8 @@
-Toolbox
+BuildSci Toolbox
 =======
-
-Set of Tools created by members of the Building Science Group
-
-Tools can be found at: [toolbox.buildsci.us](http://toolbox.buildsci.us)
-
-###Tools Include:
-- SQL to JSON for EnergyPlus Outputs
-- SQL to CSV for EnergyPlus Outputs
-- GeoJSON Converter (coming soon)
-- EPWreader for weather files
-- OpenStudioVirtualMachine
+Set of Tools created by members of the [Building Science Group](http://www.buildsci.us/):
+- `EPWreader` Matlab code for reading EnergyPlus weather files
+- `NIST rates` R code and data for NIST price escalation rates
+- `SQLtoCSV` directions on reading EnergyPlus .sql files
+- `VirtualPulseMachineImage` a vagrant box to run VirtualPulse locally as a virtual machine
+- `OpenStudioMeasures` BSG custom measures to apply to OpenStudio models.  Contains drafts for [BCL](bcl.nrel.gov/), or custom measures.

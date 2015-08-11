@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<title>Meter Flood Plot</title>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+	<title>ReportingMeasure</title>
+	
+	<!-- redundant dependencies -->
+	<link href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>	
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js"></script>
+	<link href="file:///<%= web_asset_path %>/bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript" src="file:///<%= web_asset_path %>/jquery.min.js"></script>
+	<script type="text/javascript" src="file:///<%= web_asset_path %>/d3.min.js"></script>
+   
+   <style type="text/css">
+    .slice text {
+        font-size: 10pt;
+        font-family: Arial;
+    }
+	.axis path, 
+	.axis line {
+		fill: none;
+		stroke: black;
+		shape-rendering: crispEdges;
+	}	
+	.axis text {
+		font: 10pt Arial;
+	}	
+	.legend text {
+		font: 12pt Arial;
+	}
+	.brush .extent {
+	  stroke: #FF0000;
+	  stroke-width: 2px;
+	  fill-opacity: .125;
+	  shape-rendering: crispEdges;
+	}
+	</style>
+</head>
+
+<body>
+	<br>
+	<p class="tab"><b><%= plot_title %></b></p>
+	<div id='heatmap'></div>
+    <script type="text/javascript">
+		var data = [<%= output_hourly_plr %>];			
+		var value_range = [<%= value_range %>];
+		var min_value = value_range[0].low,		//from measure
+			max_value = value_range[0].high,	//from measure
+			steps = 7,							//number of steps in color scale
+			scale_step = (max_value - min_value)/steps,
+			color_values = [];
+
+		//define color map
+		var jetmap = ['darkblue','blue', 'cyan', 'greenyellow', 'yellow', 'orange', 'red','darkred'];
+		for (var i = 0; i < steps + 1; i++) {
+			color_values.push(min_value + scale_step*i);
+		}
+		var colorScale = d3.scale.linear()
+			.domain(color_values)
+			.range(jetmap);
+
+		//define grid and svg
+		var gridSize = 30,
+			h = gridSize,		//height of each row in the heatmap
+			w = gridSize/15,	//width of each column in the heatmap
+			rectPadding = 0;
+
+		var margin = {top: 10, right: 120, bottom: 120, left: 40},
+			width = w*(data.length/24), //extra day to account for leap years
+			height = h*24;
+
+		var svg = d3.select("#heatmap").append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom);
+
+		//legend
+		var legend = svg.append("g")
+			.attr("class","legend")
+			.attr("transform", "translate(" + (width + margin.left) + "," + margin.top + ")")
+
+		//color legend for color scale
+		legend.selectAll("rect")
+			.data(colorScale.domain())
+		  .enter().append("rect")
+			.attr("x", 5)
+			.attr("y", function(d,i) {return height - (h*24/8)*(i+1); } )
+			.attr("width", 15)
+			.attr("height", h*24/8)
+			.style("fill", function(d) {return colorScale(d); })
+
+		//convert units text version of scale
+		var scale = [<%= color_scale_values %>];
+
+		// text label for the color scale
+		legend.selectAll("text")
+			.data(scale)
+		  .enter().append("text")
+			.style("text-anchor", "left")
+			.attr("x", 20)
+			.attr("y", function(d,i) { return height - (h*24/8)*(i+0.5); })
+			.text(function(d, i) { return scale[i].value; });
+
+		//y-axis times scale_step
+		var times = ["1am","2am","3am","4am","5am","6am","7am","8am","9am","10am","11am","12pm","1pm","2pm","3pm","4pm","5pm","6pm","7pm","8pm","9pm","10pm","11pm","12am"];
+		var y = d3.scale.linear()
+				.range([height - h, height - 24*h])
+				.domain([1,24]),
+			yAxis = d3.svg.axis()
+				.orient("left")
+				.scale(y)
+				.ticks(24)
+				.tickFormat( function(d,i) { return times[i]; });
+		svg.append("g")
+			.attr("class", "axis")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+			.call(yAxis);
+
+		//recast date in data to javascript format
+		var date_format = d3.time.format("%Y-%b-%d %H:%M:%S");
+
+		var date_domain = d3.extent(data.map(function(d) { return date_format.parse(d.dateTime); }));
+
+		//x-axis brush
+		var x = d3.time.scale().range([0, width]).domain(date_domain),
+			x2 = d3.time.scale().range([0, width]).domain(date_domain),
+			xAxis = d3.svg.axis().scale(x).orient("bottom"),
+			brush = d3.svg.brush()
+				.x(x2).extent(date_domain)
+				.on("brush", brushed);
+
+		//focus axis is what is manipulated by the chosen context
+		var focus_axis = svg.append("g")
+			.attr("transform", "translate(" + margin.left + "," + (margin.top + height) + ")");
+
+		focus_axis.append("g")
+			.attr("class", "x axis")
+			.call(xAxis);
+
+		//context axis is brushable to select the focus
+		var context_axis = svg.append("g")
+			.attr("transform", "translate(" + margin.left + "," + (margin.top + height) + ")");
+
+		 context_axis.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0,30)")
+			.call(xAxis);
+
+		 context_axis.append("g")
+			.attr("class", "brush")
+			.call(brush)
+		  .selectAll("rect")
+			.attr("y", 30)
+			.attr("height", 20);
+
+		//heatmap
+		svg.append("g")
+			.attr("class", "heatmap")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		//update function for the heatmap, which plots only what's in data_array
+		function update_heatmap(data_array) {
+			//D3's exit and remove functions rely on the index of an object in array to decide to keep it or not
+			//This makes it difficult to remove old elements, as it just picks the first n elements, where n is the data length
+			//So instead, we just remove all the rectangles.  It is faster than a transition anyways.
+			d3.select(".heatmap").selectAll("rect").data([]).exit().remove();
+
+			//update the rectangle width to fill the space
+			w = width*24/data_array.length;
+
+			var heatmap = d3.select(".heatmap").selectAll("rect").data(data_array);
+			heatmap.enter()
+				.append("rect")
+				.attr("class","rect")
+				.attr("x", function(d) { return (d.day - data_array[0].day)*w; })
+				.attr("y", function(d,i) { return height - (d.hour+1)*h; })
+				.attr("width", function(d) { return w; })
+				.attr("height", function(d) { return h; })
+				.style("fill", function(d) { return colorScale(d.value); });
+		}
+		//initial call
+		update_heatmap(data);
+
+		//function that returns the data within the data domain to the closest day
+		function getData(date_domain) {
+			var low_idx = 0,
+				high_idx = 0;
+			
+			//find the time closet to the axis
+			for (var i = 0; i < data.length; i++) {
+				temp_d = date_format.parse(data[i].dateTime);
+				temp_dmin = date_format.parse(data[low_idx].dateTime);
+				temp_dmax = date_format.parse(data[high_idx].dateTime);
+				if ( Math.abs(date_domain[0] - temp_d) < Math.abs(date_domain[0] - temp_dmin) ) {
+					low_idx = i;
+				};
+				if ( Math.abs(date_domain[1] - temp_d) < Math.abs(date_domain[1] - temp_dmax) ) {
+					high_idx = i;
+				};
+			};
+
+			//add 1 to low_idx to get rid of the 23rd hour from the prior day from the day rounding function
+			if (data[low_idx].hour == 23) low_idx++;
+			
+			var new_data = [];
+			for (var i = low_idx; i < high_idx + 1; i++) {
+				new_data.push(data[i]);
+			};
+			return new_data;
+		};
+
+		//update on brush
+		function brushed() {
+			extent = (brush.empty() ? x2.domain() : brush.extent());
+			new_domain = extent.map(d3.time.day.round);
+
+			//if empty when rounded, use floor & ceil instead
+			if (new_domain[0] >= new_domain[1]) {
+				new_domain[0] = d3.time.day.floor(extent[0]);
+				new_domain[1] = d3.time.day.ceil(extent[1]);
+			}
+
+			d3.select(this).call(brush.extent(extent));
+			x.domain(new_domain);
+			focus_axis.select(".x.axis").call(xAxis);
+			new_data = getData(new_domain);
+			update_heatmap(new_data);
+		};
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<measure>
+  <schema_version>3.0</schema_version>
+  <name>meter_flood_plot_brushable</name>
+  <uid>2c3ded96-f5a8-4f42-bf65-009c62ad3065</uid>
+  <version_id>da2bb81c-891f-4cce-953d-8333e9404542</version_id>
+  <xml_checksum>C46EF23F</xml_checksum>
+  <class_name>MeterFloodPlotBrushable</class_name>
+  <display_name>MeterFloodPlot_Brushable</display_name>
+  <description>This measures generates a brushable flood plot of the requested meter.</description>
+  <modeler_description>To use this measure you need to also add a measure to add the meter to the model with hourly frequency.</modeler_description>
+  <arguments>
+    <argument>
+      <name>meter_name</name>
+      <display_name>Enter Meter Name.</display_name>
+      <type>String</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>Electricity:Facility</default_value>
+    </argument>
+  </arguments>
+  <provenances/>
+  <tags>
+    <tag>Reporting.QAQC</tag>
+  </tags>
+  <attributes>
+    <attribute>
+      <name>Uses SketchUp API</name>
+      <value>false</value>
+      <datatype>boolean</datatype>
+    </attribute>
+    <attribute>
+      <name>Measure Type</name>
+      <value>ReportingMeasure</value>
+      <datatype>string</datatype>
+    </attribute>
+  </attributes>
+  <files>
+    <file>
+      <filename>report.html.in</filename>
+      <filetype>in</filetype>
+      <usage_type>resource</usage_type>
+      <checksum>4B4C11C3</checksum>
+    </file>
+    <file>
+      <version>
+        <software_program>OpenStudio</software_program>
+        <identifier>1.2.0</identifier>
+        <min_compatible>1.2.0</min_compatible>
+      </version>
+      <filename>measure.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>script</usage_type>
+      <checksum>7EACC521</checksum>
+    </file>
+  </files>
+</measure>

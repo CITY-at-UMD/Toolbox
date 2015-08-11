@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+ <title>Meter Flood Plot</title>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+	<title>ReportingMeasure</title>
+	
+	<!-- redundant dependencies -->
+	<link href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>	
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js"></script>
+	<link href="file:///<%= web_asset_path %>/bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript" src="file:///<%= web_asset_path %>/jquery.min.js"></script>
+	<script type="text/javascript" src="file:///<%= web_asset_path %>/d3.min.js"></script>
+   
+   <style type="text/css">
+    .slice text {
+        font-size: 10pt;
+        font-family: Arial;
+    }
+	.axis path, 
+	.axis line {
+		fill: none;
+		stroke: black;
+		shape-rendering: crispEdges;
+	}	
+	.axis text {
+		font: 10pt Arial;
+	}	
+	.legend text {
+		font: 12pt Arial;
+	}
+	</style>
+</head>
+
+<body>
+	<br>
+	<p class="tab"><b><%= plot_title %></b></p>
+	<div id='heatmap'></div>
+    <script type="text/javascript">
+		var data = [<%= output_hourly_plr %>];			
+		var value_range = [<%= value_range %>];
+		var min_value = value_range[0].low,  			//from measure
+			max_value = value_range[0].high, 			//from measure
+			steps = 7,									//number of steps in color scale
+			scale_step = (max_value - min_value)/steps,
+			color_values = [];
+		
+		//define color map
+		var jetmap = ['darkblue','blue', 'cyan', 'greenyellow', 'yellow', 'orange', 'red','darkred'];
+		for (var i = 0; i < steps + 1; i++) {
+			color_values.push(min_value + scale_step*i);
+		}		
+		var colorScale = d3.scale.linear()
+			.domain(color_values)
+			.range(jetmap);
+			
+		//define grid and svg
+		var gridSize = 30,
+			h = gridSize,								//height of each row in the heatmap
+			w = gridSize/15,							//width of each column in the heatmap
+			rectPadding = 0;
+		
+		var margin = {top: 10, right: 120, bottom: 80, left: 40},
+			width = w*366, //extra day to account for leap years
+			height = h*24;
+		
+		var svg = d3.select("#heatmap").append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom);
+		
+		//heatmap
+		svg.append("g")
+			.attr("class", "heatmap")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+			.selectAll("rect")
+			.data(data, function(d) { return d.day + ':' + d.hour; })
+		  .enter().append("rect")
+			.attr("x", function(d) { return d.day * w; })
+			.attr("y", function(d,i) { return height - (d.hour+1)*h; })
+			.attr("width", function(d) { return w; })
+			.attr("height", function(d) { return h; })
+			.style("fill", function(d) { return colorScale(d.value); });
+		
+		//legend element
+		var legend = svg.append("g")
+			.attr("class","legend")
+			.attr("transform", "translate(" + (width + margin.left) + "," + margin.top + ")")
+		
+		// color legend for color scale
+		legend.selectAll("rect")
+			.data(colorScale.domain())
+		  .enter().append("rect")
+			.attr("x", 5)
+			.attr("y", function(d,i) {return height - (h*24/8)*(i+1); } )
+			.attr("width", 15)
+			.attr("height", h*24/8)
+			.style("fill", function(d) {return colorScale(d); })
+		
+		//convert units text version of scale
+		var scale = [<%= color_scale_values %>];
+		
+		// text label for the color scale
+		legend.selectAll("text")
+			.data(scale)
+		  .enter().append("text")
+			.style("text-anchor", "left")
+			.attr("x", 20)
+			.attr("y", function(d,i) {return height - (h*24/8)*(i+0.5); } )
+			.text(function(d, i) { return scale[i].value; });		
+		
+		// add times scale to the figure
+		var times = ["1am","2am","3am","4am","5am","6am","7am","8am","9am","10am","11am","12pm","1pm","2pm","3pm","4pm","5pm","6pm","7pm","8pm","9pm","10pm","11pm","12am"];
+		var y = d3.scale.linear()
+				.range([height - h, height - 24*h])
+				.domain([1,24]),
+			yAxis = d3.svg.axis()
+				.orient("left")
+				.scale(y)
+				.ticks(24)
+				.tickFormat( function(d,i) { return times[i]; });
+		svg.append("g")
+			.attr("class", "axis")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+			.call(yAxis);
+
+		var data_month = [{"label":"Jan"},{"label":"Feb"},{"label":"Mar"},{"label":"April"},{"label":"May"},{"label":"June"},{"label":"July"},{"label":"Aug"},{"label":"Sept"},{"label":"Oct"},{"label":"Nov"},{"label":"Dec"}];
+	
+		// text label for month
+		svg.append("g")			
+			.attr("class", "axis")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+			.selectAll("text")	
+			.data(data_month)
+		  .enter().append("text")             
+			.style("text-anchor", "middle")
+			.attr("x", function(d,i) {return width*i/12 + w*15; } )
+			.attr("y", height + 20)
+			.text(function(d, i) { return data_month[i].label; });
+    </script>
+</body>
+</html>
