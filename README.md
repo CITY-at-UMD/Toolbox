@@ -1,6 +1,6 @@
 BuildSci Toolbox
 =======
-Set of Tools created by members of the [Building Science Group](http://www.buildsci.us/):
+Tools created by members of the [Building Science Group](http://www.buildsci.us/):
 - `EPWreader` Matlab code for reading EnergyPlus weather files
 - `NIST rates` R code and data for NIST price escalation rates
 - `SQLtoCSV` directions on reading EnergyPlus .sql files
