@@ -1,1 +1,1 @@
-sqlite3.exe -csv Bldg101_Baseline.sql "SELECT * FROM TabularDataWithStrings" > TabularDataWithStrings.csv
+sqlite3.exe -csv eplusout.sql "SELECT * FROM TabularDataWithStrings" > TabularDataWithStrings.csv
