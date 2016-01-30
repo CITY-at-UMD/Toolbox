@@ -15,12 +15,12 @@ ruby -v
 cd ~/
 
 #EnergyPlus
-wget https://github.com/NREL/EnergyPlus/releases/download/v8.2.0-Update-1.2/EnergyPlus-8.2.0-8397c2e30b-Linux-x86_64.sh
-sudo bash ./EnergyPlus-8.2.0-8397c2e30b-Linux-x86_64.sh
+wget https://github.com/NREL/EnergyPlus/releases/download/v8.4.0-Update1/EnergyPlus-8.4.0-09f5359d8a-Linux-x86_64.sh
+sudo bash ./EnergyPlus-8.4.0-09f5359d8a-Linux-x86_64.sh
 
 #OpenStudio
-wget https://github.com/NREL/OpenStudio/releases/download/v1.7.0/OpenStudio-1.7.0.c5bad04b2c-Linux.deb
-sudo dpkg -i OpenStudio-1.7.0.c5bad04b2c-Linux.deb
+wget https://openstudio-builds.s3.amazonaws.com/1.10.0/OpenStudio-1.10.0.bc05249524-Linux.deb
+sudo dpkg -i OpenStudio-1.10.0.bc05249524-Linux.deb
 # update the install dependencies and try again
-sudo apt-get -y install -f 
-sudo dpkg -i OpenStudio-1.7.0.c5bad04b2c-Linux.deb
+sudo apt-get -y install -f
+sudo dpkg -i OpenStudio-1.10.0.bc05249524-Linux.deb
